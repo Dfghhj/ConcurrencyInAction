@@ -50,6 +50,8 @@ class Account2 {
 
     private Allocator allocator = Allocator.getInstance();
 
+    private Allocator2 allocator2 = Allocator2.getInstance();
+
     private final Lock lock = new ReentrantLock();
 
     Account2(int id, int balance) {
@@ -67,10 +69,9 @@ class Account2 {
 
     /**
      * 会死锁 ！！
-     * 查看堆栈，可以看到线程状态：java.lang.Thread.State: BLOCKED
+     * 查看堆栈，可以看到线程互相等待获取对方持有的锁
      */
     private void transfer1(Account2 target, int amt) {
-        //加类锁可以同时保护对this和target的操作
         synchronized(this) {
             synchronized (target) {
                 if (this.balance >= amt) {
@@ -87,7 +88,6 @@ class Account2 {
      */
     private void transfer2(Account2 target, int amt) {
         while (!allocator.apply(this, target));
-        //加类锁可以同时保护对this和target的操作
         try {
             synchronized (this) {
                 synchronized (target) {
@@ -99,6 +99,28 @@ class Account2 {
             }
         } finally {
             allocator.free(this, target);
+        }
+    }
+
+    /**
+     * 1.1同时申请this和target的锁
+     * (破坏占用且等待条件)
+     *  (1)中‘while (!allocator.apply(this, target));’如果申请不到会一直死循环，如果apply耗时长或者并发冲突量大时，可能需要循环上万次才会获取到锁，非常消耗cpu
+     *  等待-通知 wait(),notify(),notifyAll()
+     */
+    private void transfer2_1(Account2 target, int amt) {
+        allocator2.apply(this, target);
+        try {
+            synchronized (this) {
+                synchronized (target) {
+                    if (this.balance >= amt) {
+                        this.balance -= amt;
+                        target.balance += amt;
+                    }
+                }
+            }
+        } finally {
+            allocator2.free(this, target);
         }
     }
 
