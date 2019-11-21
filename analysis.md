@@ -94,8 +94,16 @@ try {
 }
 ```
 
+###9.[CountDownLatch](src/main/java/top/dfghhj/util/CountDownLatchTest.java)
+使用线程池的情况下，无法使用join来等待线程完成，这时候就需要CountDownLatch了。  
+创建CountDownLatch的时候初始化了一个计数器，线程完成时countDown()会使计数器减1。  
+await()会阻塞调用线程等到CountDownLatch计数器减至0。
 
+###10.[CyclicBarrier](src/main/java/top/dfghhj/util/CyclicBarrierTest.java)
+CyclicBarrier相较于CountDownLatch可以自动重置。  
+CyclicBarrier的await()会使计数器减1，当减至0的时候，会自动重置。 
+初始化的时候可以设置一个回调函数，用来执行减至0的时候的后续操作。  
+这个操作建议用线程池去执行，因为如果不设置，这个后续操作将在把计数器减至0的线程中执行。
 
-  
 
 
