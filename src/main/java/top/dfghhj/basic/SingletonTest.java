@@ -15,7 +15,7 @@ public class SingletonTest {
         if (singletonTest == null) {
             synchronized (SingletonTest.class) {
                 if (singletonTest == null) {
-                    singletonTest = new SingletonTest();//1
+                    singletonTest = new SingletonTest();// (1)
                 }
             }
         }
