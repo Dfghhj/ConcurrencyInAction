@@ -47,5 +47,55 @@ Condition工具类实现了管程模型里面的条件变量。
 信号量模型：一个计数器，一个等待队列，三个方法（init()、down() 和 up()）。  
 Semaphore允许多个线程访问临界区。可以用来实现各种池。
 
+###7.[ReadWriteLock](src/main/java/top/dfghhj/util/lock/ReadWriteLockTest.java)
+读写锁适合读多写少的场景，比如缓存。  
+读写锁，允许多个线程同时获取读锁，只能一个线程获取写锁。  
+读锁和写锁互斥。  
+获取读锁后，未释放前不能再获取写锁，写锁会一直等待；（不允许锁的升级）  
+获取写锁后，未释放前可以再获取读锁。（允许锁的降级）
+
+###8.[StampedLock](src/main/java/top/dfghhj/util/lock/StampedLockTest.java)
+StampedLock 支持三种模式：写锁、悲观读锁和乐观读。  
+写锁、悲观读锁类似于ReadWriteLock的写锁和读锁；  
+乐观读是无锁的读，通过tryOptimisticRead()来返回stamp，因为无锁，所以获取来返回stamp到读的过程中，数据可能被其他线程改了，所以需要配合validate(stamp)来使用，验证不通过就考虑升级成读锁。  
+乐观读和数据库的乐观锁有异曲同工之妙。  
+StampedLock 的功能仅仅是 ReadWriteLock 的子集！  
+不支持重入；  
+不支持条件变量；  
+线程阻塞在 StampedLock 的 readLock() 或者 writeLock() 上时，此时调用该阻塞线程的 interrupt() 方法，会导致 CPU 飙升。
+```
+final StampedLock sl = new StampedLock();
+
+// 乐观读
+long stamp = sl.tryOptimisticRead();
+// 读入方法局部变量
+......
+// 校验stamp
+if (!sl.validate(stamp)){
+  // 升级为悲观读锁
+  stamp = sl.readLock();
+  try {
+    // 读入方法局部变量
+    .....
+  } finally {
+    //释放悲观读锁
+    sl.unlockRead(stamp);
+  }
+}
+//使用方法局部变量执行业务操作
+......
+
+long stamp = sl.writeLock();
+try {
+  // 写共享变量
+  ......
+} finally {
+  sl.unlockWrite(stamp);
+}
+```
+
+
+
+  
 
 
