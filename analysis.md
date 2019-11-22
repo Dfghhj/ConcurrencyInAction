@@ -109,5 +109,25 @@ CyclicBarrier的await()会使计数器减1，当减至0的时候，会自动重�
 原子类(Atomic)，是利用了Cpu指令-CAS指令(Copy and Swap, 比较并交换)， 指令本身是能够保证原子性的。  
 注意ABA问题，可以添加版本号解决。
 
+###11.[ThreadPool](src/main/java/top/dfghhj/util/future/MyThreadPool.java)
+实现了简化的线程池，说明工作原理。Java 提供的线程池相关的工具类中，最核心的是：  
+```
+ThreadPoolExecutor(
+  int corePoolSize, //最小线程数
+  int maximumPoolSize, //最大线程数
+  long keepAliveTime, //线程空闲了keepAliveTime & unit，且当前线程数大于corePoolSize，就要被回收了
+  TimeUnit unit,
+  BlockingQueue<Runnable> workQueue, //工作队列
+  ThreadFactory threadFactory, //自定义如何创建线程
+  RejectedExecutionHandler handler) //自定义任务的拒绝策略
+```
+ThreadPoolExecutor 已经提供了以下 4 种策略。  
+- CallerRunsPolicy：提交任务的线程自己去执行该任务。  
+- AbortPolicy：默认的拒绝策略，会 throws RejectedExecutionException。  
+- DiscardPolicy：直接丢弃任务，没有任何异常抛出。  
+- DiscardOldestPolicy：丢弃最老的任务，其实就是把最早进入工作队列的任务丢弃，然后把新任务加入到工作队列。  
+
+不建议使用Executors，提供的很多方法默认使用的都是无界的 LinkedBlockingQueue，高负载下容易oom。  
+强烈建议使用有界队列。  
 
 
