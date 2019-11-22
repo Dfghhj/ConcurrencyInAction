@@ -105,5 +105,9 @@ CyclicBarrier的await()会使计数器减1，当减至0的时候，会自动重�
 初始化的时候可以设置一个回调函数，用来执行减至0的时候的后续操作。  
 这个操作建议用线程池去执行，因为如果不设置，这个后续操作将在把计数器减至0的线程中执行。
 
+###11.[Atomic](src/main/java/top/dfghhj/util/atomic/AtomicCalcTest.java)
+原子类(Atomic)，是利用了Cpu指令-CAS指令(Copy and Swap, 比较并交换)， 指令本身是能够保证原子性的。  
+注意ABA问题，可以添加版本号解决。
+
 
 

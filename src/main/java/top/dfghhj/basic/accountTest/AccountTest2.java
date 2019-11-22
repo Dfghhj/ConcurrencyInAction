@@ -128,7 +128,7 @@ class Account2 {
      * 2.如果不能获加锁，就主动释放它占有的资源
      * （破坏不可抢占条件）
      */
-    private void transfer3(Account2 target, int amt) {
+    private void transfer3(Account2 target, int amt) throws InterruptedException {
         while (true) {
             if (this.lock.tryLock()){
                 try {
@@ -147,6 +147,8 @@ class Account2 {
                     this.lock.unlock();
                 }
             }
+            //新增：sleep一个随机时间避免活锁
+            Thread.sleep((long) (100 * Math.random()));
         }
     }
 
