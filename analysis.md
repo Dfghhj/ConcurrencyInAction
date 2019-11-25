@@ -130,4 +130,105 @@ ThreadPoolExecutor 已经提供了以下 4 种策略。
 不建议使用Executors，提供的很多方法默认使用的都是无界的 LinkedBlockingQueue，高负载下容易oom。  
 强烈建议使用有界队列。  
 
+### 14.[Future](src/main/java/top/dfghhj/util/future/FutureTaskTest.java)
+Future接口:  
+```
+// 取消任务
+boolean cancel(boolean mayInterruptIfRunning);
+// 判断任务是否已取消  
+boolean isCancelled();
+// 判断任务是否已结束
+boolean isDone();
+// 获得任务执行结果
+get();
+// 获得任务执行结果，支持超时
+get(long timeout, TimeUnit unit);
+```
+FutureTask类:  
+```
+FutureTask(Callable<V> callable);
+FutureTask(Runnable runnable, V result);
+```
+FutureTask 实现了 Runnable 和 Future 接口。  
+由于实现了 Runnable 接口，所以可以将 FutureTask 对象作为任务提交给 ThreadPoolExecutor 去执行，也可以直接被 Thread 执行；  
+又因为实现了 Future 接口，所以也能用来获得任务的执行结果。  
+
+### 15.[CompletableFuture](src/main/java/top/dfghhj/util/future/CompletableFutureTest.java)
+异步化:利用多线程优化性能这个核心方案得以实施的基础。  
+默认情况下 CompletableFuture 会使用公共的 ForkJoinPool 线程池。  
+ForkJoinPool默认创建的线程数是 CPU 的核数  
+（也可以通过 JVM option:-Djava.util.concurrent.ForkJoinPool.common.parallelism 来设置 ForkJoinPool 线程池的线程数）。
+根据不同的业务类型创建不同的线程池，以避免互相干扰。  
+```
+//使用默认线程池
+static CompletableFuture<Void> runAsync(Runnable runnable)
+static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier)
+//可以指定线程池  
+static CompletableFuture<Void> runAsync(Runnable runnable, Executor executor)
+static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor)  
+```
+CompletionStage 接口:  
+- 描述串行关系
+```
+CompletionStage<R> thenApply(fn);
+CompletionStage<R> thenApplyAsync(fn);
+CompletionStage<Void> thenAccept(consumer);
+CompletionStage<Void> thenAcceptAsync(consumer);
+CompletionStage<Void> thenRun(action);
+CompletionStage<Void> thenRunAsync(action);
+CompletionStage<R> thenCompose(fn);
+CompletionStage<R> thenComposeAsync(fn);
+```
+- 描述 AND 汇聚关系
+```
+CompletionStage<R> thenCombine(other, fn);
+CompletionStage<R> thenCombineAsync(other, fn);
+CompletionStage<Void> thenAcceptBoth(other, consumer);
+CompletionStage<Void> thenAcceptBothAsync(other, consumer);
+CompletionStage<Void> runAfterBoth(other, action);
+CompletionStage<Void> runAfterBothAsync(other, action);
+```
+- 描述 OR 汇聚关系
+```
+CompletionStage applyToEither(other, fn);
+CompletionStage applyToEitherAsync(other, fn);
+CompletionStage acceptEither(other, consumer);
+CompletionStage acceptEitherAsync(other, consumer);
+CompletionStage runAfterEither(other, action);
+CompletionStage runAfterEitherAsync(other, action);
+```
+- 异常处理
+```
+CompletionStage exceptionally(fn);
+CompletionStage<R> whenComplete(consumer);
+CompletionStage<R> whenCompleteAsync(consumer);
+CompletionStage<R> handle(fn);
+CompletionStage<R> handleAsync(fn);
+```
+
+### 16.[CompletionService](src/main/java/top/dfghhj/util/future/CompletionServiceTest.java)
+CompletionService接口实现类是 ExecutorCompletionService:  
+```
+ExecutorCompletionService(Executor executor);
+ExecutorCompletionService(Executor executor, BlockingQueue<Future<V>> completionQueue);
+```
+接口方法:  
+```
+Future<V> submit(Callable<V> task);
+Future<V> submit(Runnable task, V result);
+Future<V> take() throws InterruptedException;
+Future<V> poll();
+Future<V> poll(long timeout, TimeUnit unit) throws InterruptedException;
+```
+take() 方法的线程会被阻塞  
+poll() 方法会返回 null 值  
+poll(long timeout, TimeUnit unit)等待了 timeout unit 时间，阻塞队列还是空的，那么该方法会返回 null 值
+  
+当需要批量提交异步任务的时候建议你使用 CompletionService.  
+CompletionService 将线程池 Executor 和阻塞队列 BlockingQueue 的功能融合在了一起.  
+CompletionService 能够让异步任务的执行结果有序化，先执行完的先进入阻塞队列.  
+
+
+
+
 
