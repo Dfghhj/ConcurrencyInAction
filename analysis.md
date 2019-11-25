@@ -228,7 +228,28 @@ poll(long timeout, TimeUnit unit)等待了 timeout unit 时间，阻塞队列还
 CompletionService 将线程池 Executor 和阻塞队列 BlockingQueue 的功能融合在了一起.  
 CompletionService 能够让异步任务的执行结果有序化，先执行完的先进入阻塞队列.  
 
+### 16.Fork/Join
+[斐波那契数列](src/main/java/top/dfghhj/util/forkJoin/FibonacciTest.java)  
+[MapReduce](src/main/java/top/dfghhj/util/forkJoin/MapReduceTest.java)  
+分治任务模型:  
+- 一个阶段是任务分解，也就是将任务迭代地分解为子任务，直至子任务可以直接计算出结果;  
+- 另一个阶段是结果合并，即逐层合并子任务的执行结果，直至获得最终结果。  
 
+Fork/Join 是一个并行计算的框架，主要就是用来支持分治任务模型的，  
+这个计算框架里的 Fork 对应的是分治任务模型里的任务分解，Join 对应的是结果合并。  
+主要包含两部分(类似于 ThreadPoolExecutor 和 Runnable 的关系):  
+- 分治任务的线程池 ForkJoinPool  
+- 分治任务 ForkJoinTask  
 
+ForkJoinTask 是一个抽象类,最核心的是 fork() 方法和 join() 方法:  
+- fork() 方法会异步地执行一个子任务
+- join() 方法则会阻塞当前线程来等待子任务的执行结果
 
+ForkJoinTask 有两个子类:  
+- RecursiveAction, compute() 没有返回值
+- RecursiveTask, compute() 方法是有返回值
+
+ThreadPoolExecutor 内部只有一个任务队列，而 ForkJoinPool 内部有多个任务队列，当我们通过 ForkJoinPool 的 invoke() 或者 submit() 方法提交任务时，ForkJoinPool 根据一定的路由规则把任务提交到一个任务队列中，如果任务在执行过程中会创建出子任务，那么子任务会提交到工作线程对应的任务队列中。
+
+ForkJoinPool 中的任务队列采用的是双端队列，工作线程正常获取任务和“窃取任务”分别是从任务队列不同的端消费，这样能避免很多不必要的数据竞争。
 
