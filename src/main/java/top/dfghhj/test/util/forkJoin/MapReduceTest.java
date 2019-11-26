@@ -59,17 +59,9 @@ public class MapReduceTest {
 
         //合并结果
         private Map<String, Long> merge(Map<String, Long> r1, Map<String, Long> r2) {
-            Map<String, Long> result = new HashMap<>();
-            result.putAll(r1);
+            Map<String, Long> result = new HashMap<>(r1);
             //合并结果
-            r2.forEach((k, v) -> {
-                Long c = result.get(k);
-                if (c != null) {
-                    result.put(k, c + v);
-                } else {
-                    result.put(k, v);
-                }
-            });
+            r2.forEach((k, v) -> result.merge(k, v, Long::sum));
             return result;
         }
 
