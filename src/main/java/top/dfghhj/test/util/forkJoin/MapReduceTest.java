@@ -1,4 +1,4 @@
-package top.dfghhj.util.forkJoin;
+package top.dfghhj.test.util.forkJoin;
 
 import java.util.HashMap;
 import java.util.Map;

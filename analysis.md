@@ -1,33 +1,33 @@
-### 1.[累加的问题](src/main/java/top/dfghhj/basic/CalcTest.java)  
+### 1.[累加的问题](src/main/java/top/dfghhj/test/basic/CalcTest.java)  
 - 读取缓存中的值来进行计算，导致多cpu的情况下，各cpu缓存中的数值和内存中的数值不是实时同步的；  
 - 多线程同时对共享变量进行计算的时候，线程切换会导致操作结果被覆盖的情况  
 (A线程读到i=1，切换到B线程也读到i=1，B线程执行i++,切换回A线程执行i++，最后i=2);  
 - ps: 对共享变量加volatile只能解决上诉第一点的问题（可见性），不能解决第二点的问题（原子性）  
 
-### 2.[双重校验单例模式](src/main/java/top/dfghhj/basic/SingletonTest.java)
+### 2.[双重校验单例模式](src/main/java/top/dfghhj/test/basic/SingletonTest.java)
 - （1）处的代码会被优化成“a.分配一块内存 M, b.将 M 的地址赋值给 instance 变量, c.最后在内存 M 上初始化 Singleton 对象”  
     导致A线程执行完b后线程切换到B线程，B线程判断instance!=null,就返回了instance对象，然而这时候instance内部的初始化并没有完成，就会导致NPE  
 
-### 3.[转账](src/main/java/top/dfghhj/basic/accountTest/AccountTest1.java)
+### 3.[转账](src/main/java/top/dfghhj/test/basic/accountTest/AccountTest1.java)
 - 模拟了并发场景下对同一个变量进行加减的情况，最后的结果总是错误的。
   有可见性，原子性的问题。
   
-### 4.[转账--死锁](src/main/java/top/dfghhj/basic/accountTest/AccountTest2.java)
+### 4.[转账--死锁](src/main/java/top/dfghhj/test/basic/accountTest/AccountTest2.java)
 - 还是通过转账场景模拟死锁。
 - transfer1:并发情况下会出现死锁的情况，互相持有对方等待的锁，查看堆栈：
 ```
 "Thread-1" #13 prio=5 os_prio=0 tid=0x000000002023d000 nid=0x5a90 waiting for monitor entry [0x0000000020baf000]
    java.lang.Thread.State: BLOCKED (on object monitor)
-	at top.dfghhj.basic.accountTest.Account2.transfer1(AccountTest2.java:77)
-	- waiting to lock <0x000000076bd18820> (a top.dfghhj.basic.accountTest.Account2)
-	- locked <0x000000076bd24970> (a top.dfghhj.basic.accountTest.Account2)
+	at Account2.transfer1(AccountTest2.java:77)
+	- waiting to lock <0x000000076bd18820> (a Account2)
+	- locked <0x000000076bd24970> (a Account2)
     ...
 
 "Thread-0" #12 prio=5 os_prio=0 tid=0x000000002023c000 nid=0x5b10 waiting for monitor entry [0x0000000020aae000]
    java.lang.Thread.State: BLOCKED (on object monitor)
-	at top.dfghhj.basic.accountTest.Account2.transfer1(AccountTest2.java:77)
-	- waiting to lock <0x000000076bd24970> (a top.dfghhj.basic.accountTest.Account2)
-	- locked <0x000000076bd18820> (a top.dfghhj.basic.accountTest.Account2)
+	at Account2.transfer1(AccountTest2.java:77)
+	- waiting to lock <0x000000076bd24970> (a Account2)
+	- locked <0x000000076bd18820> (a Account2)
 	...
 ```
 - transfer2，transfer2_1：破坏死锁条件之一：占用且等待  
@@ -37,24 +37,24 @@
 - transfer4：破坏死锁条件之一：循环等待  
 按顺序申请this和target的锁
 
-### 5.[Lock](src/main/java/top/dfghhj/util/lock/LockTest.java)
+### 5.[Lock](src/main/java/top/dfghhj/test/util/lock/LockTest.java)
 Lock工具类相较于synchronized，能够响应中断，支持超时，非阻塞地获取锁。
 
-### 6.[Condition](src/main/java/top/dfghhj/util/lock/ConditionTest.java)
+### 6.[Condition](src/main/java/top/dfghhj/test/util/lock/ConditionTest.java)
 Condition工具类实现了管程模型里面的条件变量。
 
-### 7.[Semaphore](src/main/java/top/dfghhj/util/SemaphoreTest.java)
+### 7.[Semaphore](src/main/java/top/dfghhj/test/util/SemaphoreTest.java)
 信号量模型：一个计数器，一个等待队列，三个方法（init()、down() 和 up()）。  
 Semaphore允许多个线程访问临界区。可以用来实现各种池。
 
-### 8.[ReadWriteLock](src/main/java/top/dfghhj/util/lock/ReadWriteLockTest.java)
+### 8.[ReadWriteLock](src/main/java/top/dfghhj/test/util/lock/ReadWriteLockTest.java)
 读写锁适合读多写少的场景，比如缓存。  
 读写锁，允许多个线程同时获取读锁，只能一个线程获取写锁。  
 读锁和写锁互斥。  
 获取读锁后，未释放前不能再获取写锁，写锁会一直等待；（不允许锁的升级）  
 获取写锁后，未释放前可以再获取读锁。（允许锁的降级）
 
-### 9.[StampedLock](src/main/java/top/dfghhj/util/lock/StampedLockTest.java)
+### 9.[StampedLock](src/main/java/top/dfghhj/test/util/lock/StampedLockTest.java)
 StampedLock 支持三种模式：写锁、悲观读锁和乐观读。  
 写锁、悲观读锁类似于ReadWriteLock的写锁和读锁；  
 乐观读是无锁的读，通过tryOptimisticRead()来返回stamp，因为无锁，所以获取来返回stamp到读的过程中，数据可能被其他线程改了，所以需要配合validate(stamp)来使用，验证不通过就考虑升级成读锁。  
@@ -94,22 +94,22 @@ try {
 }
 ```
 
-### 10.[CountDownLatch](src/main/java/top/dfghhj/util/CountDownLatchTest.java)
+### 10.[CountDownLatch](src/main/java/top/dfghhj/test/util/CountDownLatchTest.java)
 使用线程池的情况下，无法使用join来等待线程完成，这时候就需要CountDownLatch了。  
 创建CountDownLatch的时候初始化了一个计数器，线程完成时countDown()会使计数器减1。  
 await()会阻塞调用线程等到CountDownLatch计数器减至0。
 
-### 11.[CyclicBarrier](src/main/java/top/dfghhj/util/CyclicBarrierTest.java)
+### 11.[CyclicBarrier](src/main/java/top/dfghhj/test/util/CyclicBarrierTest.java)
 CyclicBarrier相较于CountDownLatch可以自动重置。  
 CyclicBarrier的await()会使计数器减1，当减至0的时候，会自动重置。 
 初始化的时候可以设置一个回调函数，用来执行减至0的时候的后续操作。  
 这个操作建议用线程池去执行，因为如果不设置，这个后续操作将在把计数器减至0的线程中执行。
 
-### 12.[Atomic](src/main/java/top/dfghhj/util/atomic/AtomicCalcTest.java)
+### 12.[Atomic](src/main/java/top/dfghhj/test/util/atomic/AtomicCalcTest.java)
 原子类(Atomic)，是利用了Cpu指令-CAS指令(Copy and Swap, 比较并交换)， 指令本身是能够保证原子性的。  
 注意ABA问题，可以添加版本号解决。
 
-### 13.[ThreadPool](src/main/java/top/dfghhj/util/future/MyThreadPool.java)
+### 13.[ThreadPool](src/main/java/top/dfghhj/test/util/future/MyThreadPool.java)
 实现了简化的线程池，说明工作原理。Java 提供的线程池相关的工具类中，最核心的是：  
 ```
 ThreadPoolExecutor(
@@ -130,7 +130,7 @@ ThreadPoolExecutor 已经提供了以下 4 种策略。
 不建议使用Executors，提供的很多方法默认使用的都是无界的 LinkedBlockingQueue，高负载下容易oom。  
 强烈建议使用有界队列。  
 
-### 14.[Future](src/main/java/top/dfghhj/util/future/FutureTaskTest.java)
+### 14.[Future](src/main/java/top/dfghhj/test/util/future/FutureTaskTest.java)
 Future接口:  
 ```
 // 取消任务
@@ -153,7 +153,7 @@ FutureTask 实现了 Runnable 和 Future 接口。
 由于实现了 Runnable 接口，所以可以将 FutureTask 对象作为任务提交给 ThreadPoolExecutor 去执行，也可以直接被 Thread 执行；  
 又因为实现了 Future 接口，所以也能用来获得任务的执行结果。  
 
-### 15.[CompletableFuture](src/main/java/top/dfghhj/util/future/CompletableFutureTest.java)
+### 15.[CompletableFuture](src/main/java/top/dfghhj/test/util/future/CompletableFutureTest.java)
 异步化:利用多线程优化性能这个核心方案得以实施的基础。  
 默认情况下 CompletableFuture 会使用公共的 ForkJoinPool 线程池。  
 ForkJoinPool默认创建的线程数是 CPU 的核数  
@@ -206,7 +206,7 @@ CompletionStage<R> handle(fn);
 CompletionStage<R> handleAsync(fn);
 ```
 
-### 16.[CompletionService](src/main/java/top/dfghhj/util/future/CompletionServiceTest.java)
+### 16.[CompletionService](src/main/java/top/dfghhj/test/util/future/CompletionServiceTest.java)
 CompletionService接口实现类是 ExecutorCompletionService:  
 ```
 ExecutorCompletionService(Executor executor);
@@ -229,8 +229,8 @@ CompletionService 将线程池 Executor 和阻塞队列 BlockingQueue 的功能�
 CompletionService 能够让异步任务的执行结果有序化，先执行完的先进入阻塞队列.  
 
 ### 16.Fork/Join
-[斐波那契数列](src/main/java/top/dfghhj/util/forkJoin/FibonacciTest.java)  
-[MapReduce](src/main/java/top/dfghhj/util/forkJoin/MapReduceTest.java)  
+[斐波那契数列](src/main/java/top/dfghhj/test/util/forkJoin/FibonacciTest.java)  
+[MapReduce](src/main/java/top/dfghhj/test/util/forkJoin/MapReduceTest.java)  
 分治任务模型:  
 - 一个阶段是任务分解，也就是将任务迭代地分解为子任务，直至子任务可以直接计算出结果;  
 - 另一个阶段是结果合并，即逐层合并子任务的执行结果，直至获得最终结果。  

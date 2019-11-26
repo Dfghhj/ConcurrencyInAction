@@ -1,4 +1,4 @@
-package top.dfghhj.util.lock;
+package top.dfghhj.test.util.lock;
 
 import java.util.concurrent.locks.StampedLock;
 

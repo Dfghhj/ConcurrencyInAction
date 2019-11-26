@@ -1,4 +1,4 @@
-package top.dfghhj.util.future;
+package top.dfghhj.test.util.future;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;

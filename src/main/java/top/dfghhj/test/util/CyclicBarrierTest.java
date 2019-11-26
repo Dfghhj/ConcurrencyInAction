@@ -1,4 +1,4 @@
-package top.dfghhj.util;
+package top.dfghhj.test.util;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;

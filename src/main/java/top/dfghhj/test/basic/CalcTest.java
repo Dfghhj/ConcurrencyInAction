@@ -1,24 +1,31 @@
-package top.dfghhj.util.atomic;
-
-import java.util.concurrent.atomic.AtomicLong;
+package top.dfghhj.test.basic;
 
 /**
  * @author ：feifeng
  * @date ：Created in 2019/11/19 9:58
- * @description : 模拟多线程对同一个变量操作,使用原子类的无锁同步方案
+ * @description : 模拟多线程对同一个变量操作
  */
-public class AtomicCalcTest {
+public class CalcTest {
 
-    private AtomicLong aLong = new AtomicLong();
+    private int a = 0;
+
+//    private synchronized void addOne() {
+    private void addOne() {
+        this.a++;
+    }
 
     private void add(int addend){
         for (int i = 0; i < addend; i++) {
-            this.aLong.getAndIncrement();
+            this.addOne();
         }
     }
 
+    private int getA() {
+        return this.a;
+    }
+
     public static void main(String[] args) throws InterruptedException {
-        AtomicCalcTest calcTest = new AtomicCalcTest();
+        CalcTest calcTest = new CalcTest();
         Thread thread1 = new Thread(()->{
             calcTest.add(1000000);
         });
@@ -31,7 +38,7 @@ public class AtomicCalcTest {
         thread1.join();
         thread2.join();
 
-        System.out.println(calcTest.aLong.get());
+        System.out.println(calcTest.getA());
     }
 
 }
